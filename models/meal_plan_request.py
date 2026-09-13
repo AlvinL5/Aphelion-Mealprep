@@ -11,7 +11,7 @@ class MealPlanRequest(BaseModel):
     max_fat: float | None = Field(ge=0, default=None)
     max_price: float | None = Field(gt=0, default=None)
     calorie_percent_max: float | None = Field(gt=0, lt=1, default=None)
-    excluded_ingredients: list[str] = Field(default=[])
+    excluded_ingredients: list[str] = Field(default_factory=list)
 
     def min_max_conflict(self, nutrient):
         if getattr(self, f'max_{nutrient}') is not None and getattr(self, f'max_{nutrient}') < getattr(self, f'min_{nutrient}'):
