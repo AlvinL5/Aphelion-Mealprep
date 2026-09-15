@@ -24,7 +24,7 @@ def get_api_key():
         api_key = os.environ["FDC_API_KEY"]
     return api_key
 
-def fetch_nutrient_data(name, fdc_id):
+def fetch_nutrient_data(name, fdc_id, display_name):
     nutrient_values = {}
     api_key = get_api_key()
 
@@ -39,15 +39,17 @@ def fetch_nutrient_data(name, fdc_id):
             nutrient_values[entry["nutrient"]["id"]] = entry["amount"]
 
     #uses nutrient_values dict to build NutrientRecord
-    return NutrientRecord(name = name, fdc_id = fdc_id, calories_per_100g = nutrient_values[CALORIES_ID], protein_g_per_100g = nutrient_values[PROTEIN_ID], carbs_g_per_100g = nutrient_values[CARBS_ID],fat_g_per_100g = nutrient_values[FAT_ID])
+    return NutrientRecord(name = name, display_name = display_name, fdc_id = fdc_id, calories_per_100g = nutrient_values[CALORIES_ID], protein_g_per_100g = nutrient_values[PROTEIN_ID], carbs_g_per_100g = nutrient_values[CARBS_ID],fat_g_per_100g = nutrient_values[FAT_ID])
 
 if __name__ == "__main__":
     nutrient_records = {}
-    for name, fdc_id in INGREDIENT_FDC_IDS.items():
-        nutrient_records[name] = fetch_nutrient_data(name, fdc_id)
+    for name, entry in INGREDIENT_FDC_IDS.items():
+        fdc_id = entry['fdc_id']
+        display_name = entry['display_name']
+        nutrient_records[name] = fetch_nutrient_data(name, fdc_id, display_name)
 
     with open("data/ingredients.csv", "w", newline = "") as f:
-        writer = csv.DictWriter(f, fieldnames= ["name", "fdc_id", "calories_per_100g", "protein_g_per_100g", "carbs_g_per_100g", "fat_g_per_100g"])
+        writer = csv.DictWriter(f, fieldnames= ["name", "display_name", "fdc_id", "calories_per_100g", "protein_g_per_100g", "carbs_g_per_100g", "fat_g_per_100g"])
         writer.writeheader()
         for nutrient_record in nutrient_records.values():
             writer.writerow(nutrient_record.model_dump())
